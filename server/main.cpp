@@ -1,6 +1,11 @@
+#include <server.h>
+
+#include <boost/asio.hpp>
 #include <iostream>
 
+using boost::asio::ip::tcp;
+
 int main() {
-    std::cout << "Hello world!" << std::endl;
+    Server::Instance().Run();
     return 0;
 }
