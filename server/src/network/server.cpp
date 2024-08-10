@@ -1,7 +1,10 @@
 #include <boost/asio.hpp>
 #include <iostream>
+#include <thread>
 
-#include <server.h>
+#include <network/server.h>
+
+namespace network {
 
 Server& Server::Instance() {
     static Server server;
@@ -23,29 +26,35 @@ void Server::ListenSocket(boost::asio::ip::tcp::endpoint& endpoint,
     for (;;) {
         boost::asio::ip::tcp::socket socket(io_service);
         acceptor.accept(socket);
-        std::cout << "[SERVER::ListenSocket] Сonnection established" << std::endl;
-
-        auto request_data = ReadRequest(socket);
-
-        socket.close();
-        std::cout << "[SERVER::ListenSocket] Сlose connection" << std::endl;
+        HandleConnection(socket);
     }
     std::cout << "[SERVER::ListenSocket] Stop listen on " << endpoint << std::endl;
 }
 
-std::string Server::ReadRequest(boost::asio::ip::tcp::socket& socket) {
+void Server::HandleConnection(boost::asio::ip::tcp::socket& socket) {
+    std::cout << "[SERVER::ListenSocket] Сonnection established" << std::endl;
+
+    auto request_data = GetRequestData(socket);
+
+    socket.close();
+    std::cout << "[SERVER::ListenSocket] Сlose connection" << std::endl;
+}
+
+std::string Server::GetRequestData(boost::asio::ip::tcp::socket& socket) {
     std::string request{};
     char temp_buffer[1024];
     boost::system::error_code error_code;
 
     auto len = socket.read_some(boost::asio::buffer(temp_buffer), error_code);
     if (error_code) {
-        std::cout << "[SERVER::ReadRequest] Failed read request (ERROR_CODE: " << error_code << ")" << std::endl;
+        std::cout << "[SERVER::GetRequestData] Failed read request (ERROR_CODE: " << error_code << ")" << std::endl;
         return request;
     }
 
     request.append(temp_buffer, len);
-    std::cout << "[SERVER::ReadRequest] " << request << std::endl;
+    std::cout << "[SERVER::GetRequestData] " << request << std::endl;
 
     return request;
 }
+
+}  // namespace network

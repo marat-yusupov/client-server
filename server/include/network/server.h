@@ -1,5 +1,7 @@
 #include <boost/asio.hpp>
 
+namespace network {
+
 class Server {
 public:
     static Server& Instance();
@@ -12,5 +14,9 @@ private:
                       boost::asio::io_service& io_service,
                       boost::asio::ip::tcp::acceptor& acceptor);
 
-    std::string ReadRequest(boost::asio::ip::tcp::socket& socket);
+    void HandleConnection(boost::asio::ip::tcp::socket& socket);
+
+    std::string GetRequestData(boost::asio::ip::tcp::socket& socket);
 };
+
+}  // namespace network

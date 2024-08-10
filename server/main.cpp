@@ -1,11 +1,9 @@
-#include <server.h>
+#include <network/server.h>
 
 #include <boost/asio.hpp>
 #include <iostream>
 
-using boost::asio::ip::tcp;
-
 int main() {
-    Server::Instance().Run();
+    network::Server::Instance().Run();
     return 0;
 }
