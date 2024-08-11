@@ -2,21 +2,19 @@
 
 namespace network {
 
+class Connection;
+
 class Server {
 public:
-    static Server& Instance();
-    void Run();
+    Server(boost::asio::io_context& io_context);
 
 private:
-    Server() = default;
+    void StartAccept();
 
-    void ListenSocket(boost::asio::ip::tcp::endpoint& endpoint,
-                      boost::asio::io_service& io_service,
-                      boost::asio::ip::tcp::acceptor& acceptor);
+    void HandleAccept(std::shared_ptr<Connection> connection);
 
-    void HandleConnection(boost::asio::ip::tcp::socket& socket);
-
-    std::string GetRequestData(boost::asio::ip::tcp::socket& socket);
+    boost::asio::io_context& mContext;
+    boost::asio::ip::tcp::acceptor mAcceptor;
 };
 
 }  // namespace network
