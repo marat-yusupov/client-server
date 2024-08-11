@@ -1,7 +1,8 @@
-#include <network/server.h>
+#include <iostream>
 
 #include <boost/asio.hpp>
-#include <iostream>
+
+#include <network/server.h>
 
 int main() {
     try {
@@ -9,7 +10,7 @@ int main() {
         network::Server server{io_context};
         io_context.run();
     } catch (std::exception& exception) {
-        std::cerr << "[ERROR] " << exception.what() << std::endl;
+        std::cerr << "[SERVER::ERROR] " << exception.what() << std::endl;
     }
     return 0;
 }

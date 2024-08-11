@@ -1,4 +1,3 @@
-#include <ctime>
 #include <iostream>
 #include <thread>
 
@@ -16,6 +15,7 @@ Server::Server(boost::asio::io_context& io_context)
 }
 
 void Server::StartAccept() {
+    std::cout << "[SERVER] Start listen on " << mAcceptor.local_endpoint() << std::endl;
     for (;;) {
         auto new_connection = Connection::Create(mContext);
 
@@ -23,10 +23,13 @@ void Server::StartAccept() {
         std::thread accept_handler{[this, new_connection]() { HandleAccept(new_connection); }};
         accept_handler.detach();
     }
+    std::cout << "[SERVER] Stop listen on " << mAcceptor.local_endpoint() << std::endl;
 }
 
 void Server::HandleAccept(std::shared_ptr<Connection> connection) {
+    std::cout << "[SERVER] Сonnection established" << std::endl;
     connection->Start();
+    std::cout << "[SERVER] Сlose connection" << std::endl;
 }
 
 }  // namespace network

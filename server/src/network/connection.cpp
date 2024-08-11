@@ -1,5 +1,5 @@
 #include <iostream>
-#include <thread>
+#include <string>
 
 #include <boost/asio.hpp>
 
@@ -28,7 +28,8 @@ void Connection::Start() {
 
     auto len = mSocket.read_some(boost::asio::buffer(temp_buffer), error_code);
     if (error_code) {
-        std::cout << "[SERVER::GetRequestData] Failed read request (ERROR_CODE: " << error_code << ")" << std::endl;
+        std::cout << "[SERVER::WARNING::GetRequestData] Failed read request (ERROR_CODE: " << error_code << ")"
+                  << std::endl;
         return;
     }
 
