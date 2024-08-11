@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 #include <string>
 
 #include <boost/asio.hpp>
@@ -35,7 +36,7 @@ void Connection::Start() {
 
     std::string request{};
     request.append(temp_buffer, len);
-    std::cout << "[SERVER::GetRequestData] " << request << std::endl;
+    std::cout << "[SERVER] Request received:\n" << request << std::endl;
 }
 
 }  // namespace network
