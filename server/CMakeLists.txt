@@ -8,10 +8,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(RapidJSON)
 
-file(GLOB SOURCES "src/*.cpp")
-file(GLOB SOURCES "src/network/*.cpp")
+set(SOURCES "*.cpp"
+            "src/*.cpp"
+            "src/network/*.cpp"
+            "src/request/*.cpp"
+            "src/request/models/*.cpp")
 
-list(APPEND SOURCES main.cpp)
+file(GLOB SOURCES ${SOURCES})
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)

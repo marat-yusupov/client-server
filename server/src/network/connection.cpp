@@ -1,10 +1,9 @@
 #include <iostream>
-#include <map>
-#include <string>
 
 #include <boost/asio.hpp>
 
 #include <network/connection.h>
+#include <request/manager.h>
 
 namespace network {
 
@@ -37,6 +36,15 @@ void Connection::Start() {
     std::string request{};
     request.append(temp_buffer, len);
     std::cout << "[SERVER] Request received:\n" << request << std::endl;
+
+    request::Manager manager;
+    auto responce = manager.Process(request);
+
+    std::cout << "[SERVER] Sent responce:\n" << responce << std::endl;
+    while (!responce.empty()) {
+        boost::asio::write(mSocket, boost::asio::buffer(responce));
+        responce.erase(0, responce.find_first_of('\0'));
+    }
 }
 
 }  // namespace network

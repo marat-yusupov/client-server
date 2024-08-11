@@ -10,7 +10,7 @@ async def tcp_echo_client(message):
     writer.write(message.encode())
 
     data = await reader.read(100)
-    print(f"Received: {data.decode()}")
+    print(f"Received:\n{data.decode()}")
 
     print("Closing the connection")
     writer.close()
@@ -18,7 +18,7 @@ async def tcp_echo_client(message):
 
 
 json_request = """{ 
-    \"method\": \"get\",
+    \"method\": \"$get\",
     \"key\": \"tree\"
 }"""
 
