@@ -4,7 +4,7 @@
 
 namespace network {
 
-class Connection : public std::enable_shared_from_this<Connection> {
+class Connection {
 public:
     static std::shared_ptr<Connection> Create(boost::asio::io_context& io_context);
     ~Connection();
