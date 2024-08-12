@@ -25,6 +25,10 @@ rapidjson::Document GetResult::ToJson() {
 Get::Get(std::string const& key) : mKey{key} {}
 Get::~Get() {}
 
+RequestName Get::Name() {
+    return RequestName::Get;
+}
+
 std::unique_ptr<IResult> Get::Process() {
     auto it = MockDataTable.find(mKey);
     if (it == MockDataTable.end()) {

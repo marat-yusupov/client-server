@@ -25,6 +25,10 @@ Set::Set(std::string const& key, std::string const& new_value) : mKey{key}, mNew
 
 Set::~Set() {}
 
+RequestName Set::Name() {
+    return RequestName::Set;
+}
+
 std::unique_ptr<IResult> Set::Process() {
     try {
         auto it = MockDataTable.find(mKey);

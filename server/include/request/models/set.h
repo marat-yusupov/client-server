@@ -21,7 +21,9 @@ public:
     Set(std::string const& key, std::string const& new_value);
     ~Set() override;
 
-    virtual std::unique_ptr<IResult> Process() override;
+    RequestName Name() override;
+
+    std::unique_ptr<IResult> Process() override;
 
 private:
     std::string mKey;

@@ -21,7 +21,9 @@ public:
     Get(std::string const& key);
     ~Get() override;
 
-    virtual std::unique_ptr<IResult> Process() override;
+    RequestName Name() override;
+
+    std::unique_ptr<IResult> Process() override;
 
 private:
     std::string mKey;
