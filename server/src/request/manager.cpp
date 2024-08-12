@@ -1,6 +1,8 @@
 #include <iostream>
 
 #include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <request/manager.h>
 #include <request/models/get.h>
@@ -14,20 +16,21 @@ Manager::~Manager() = default;
 std::string Manager::Process(std::string const& request_json_as_string) {
     auto prepared_request = Prepare(request_json_as_string);
     if (!prepared_request) {
-        return GetErrorResultJSON("Parse request args FAILED");
+        return GetErrorResult("Parse request args FAILED");
     }
 
     auto request_result = prepared_request->Process();
     if (!request_result) {
-        return GetErrorResultJSON("Request process FAILED");
+        return GetErrorResult("Request process FAILED");
     }
 
-    auto request_result_as_json = request_result->ToJson();
-    if (!request_result_as_json.HasMember("result")) {
-        return GetErrorResultJSON("Parse request result FAILED");
-    }
+    auto request_result_json = request_result->ToJson();
 
-    return request_result_as_json["result"].GetString();
+    rapidjson::StringBuffer sbuf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(sbuf);
+    request_result_json.Accept(writer);
+
+    return sbuf.GetString();
 }
 
 std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_string) {
@@ -65,10 +68,8 @@ std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_st
     return nullptr;
 }
 
-std::string Manager::GetErrorResultJSON(std::string const& error_message) {
-    return R"({
-    "error": ")" +
-           error_message + "\"\n}";
+std::string Manager::GetErrorResult(std::string const& error_message) {
+    return "{\"error\":\"" + error_message + "\"}";
 }
 
 }  // namespace request

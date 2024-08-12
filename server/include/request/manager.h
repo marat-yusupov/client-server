@@ -15,7 +15,7 @@ public:
 private:
     std::unique_ptr<IRequest> Prepare(std::string const& request_json_as_string);
 
-    std::string GetErrorResultJSON(std::string const& error_message);
+    std::string GetErrorResult(std::string const& error_message);
 };
 
 }  // namespace request
