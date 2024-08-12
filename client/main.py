@@ -1,37 +1,52 @@
 # TODO: RAW CLIENT! NOT FOR DEMONSTRATION! ONLY FOR TESTING!
 
 import asyncio
+import socket
+import random
+import json
+
+keys = [
+    "tree",
+    "cube",
+    "pen",
+    "book",
+    "car",
+    "dog",
+    "elephant",
+    "fish",
+    "guitar",
+    "yamaha",
+]
 
 
-async def tcp_echo_client(message):
-    reader, writer = await asyncio.open_connection("127.0.0.1", 8080)
-
-    print(f"[CLIENT] Send:\n{message}")
-    writer.write(message.encode())
-
-    data = await reader.read(100)
-    print(f"[CLIENT] Received:\n{data.decode()}")
-
-    print("[CLIENT] Closing the connection")
-    writer.close()
-    await writer.wait_closed()
+async def tcp_echo_client(request, sock):
+    print(f"[CLIENT] Sent request: {request}")
+    sock.sendall(json.dumps(request).encode())
+    responce = sock.recv(1024)
+    print(f"[CLIENT] Received responce: {responce.decode()}")
 
 
-json_request = """{ 
-    \"method\":\"$get\",
-    \"key\":\"tree\"
-}"""
-asyncio.run(tcp_echo_client(json_request))
+def main():
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        host = "localhost"
+        port = 8080
+        sock.connect((host, port))
 
-json_request = """{ 
-    \"method\":\"$set\",
-    \"key\":\"tree\",
-    \"value\":\"Green\"
-}"""
-asyncio.run(tcp_echo_client(json_request))
+        for i in range(11):
+            key = random.choice(keys)
 
-json_request = """{ 
-    \"method\":\"$get\",
-    \"key\":\"tree\"
-}"""
-asyncio.run(tcp_echo_client(json_request))
+            if i == 10:
+                request = {"key": key, "method": "$set", "value": random.randint(1, 9)}
+                asyncio.run(tcp_echo_client(request, sock))
+                continue
+
+            request = {"key": key, "method": "$get"}
+            asyncio.run(tcp_echo_client(request, sock))
+
+        sock.close()
+    except ConnectionRefusedError:
+        print(f"[CLIENT] Server ({host}:{port}) not available")
+
+
+main()
