@@ -22,28 +22,40 @@ boost::asio::ip::tcp::socket& Connection::Socket() {
     return mSocket;
 }
 
+// TODO: Подумать, как реализовать таймер, чтобы отключаться от клиента, если запросов нет более N-секунд
+// TODO: Подумать, как разбить метод на разные методы
 void Connection::Start() {
-    char temp_buffer[1024];
-    boost::system::error_code error_code;
+    std::cout << "[SERVER] Сonnection established" << std::endl;
 
-    auto len = mSocket.read_some(boost::asio::buffer(temp_buffer), error_code);
-    if (error_code) {
-        std::cout << "[SERVER::WARNING::GetRequestData] Failed read request (ERROR_CODE: " << error_code << ")"
-                  << std::endl;
-        return;
-    }
+    // TODO: Переделать на while(mSocket.is_open()) когда будет реализован таймер
+    for (;;) {
+        char temp_buffer[1024];
+        boost::system::error_code error_code;
 
-    std::string request{};
-    request.append(temp_buffer, len);
-    std::cout << "[SERVER] Request received:\n" << request << std::endl;
+        auto len = mSocket.read_some(boost::asio::buffer(temp_buffer), error_code);
+        if (error_code) {
+            if (error_code != boost::asio::error::eof) {
+                std::cout << "[SERVER::WARNING] Failed read request (ERROR_CODE: " << error_code << ")" << std::endl;
+                continue;
+            }
 
-    request::Manager manager;
-    auto responce = manager.Process(request);
+            std::cout << "[SERVER] Connection reset by peer" << std::endl;
+            mSocket.close();
+            return;
+        }
 
-    std::cout << "[SERVER] Sent responce:\n" << responce << std::endl;
-    while (!responce.empty()) {
-        boost::asio::write(mSocket, boost::asio::buffer(responce));
-        responce.erase(0, responce.find_first_of('\0'));
+        std::string request{};
+        request.append(temp_buffer, len);
+        std::cout << "[SERVER] Request received:\n" << request << std::endl;
+
+        request::Manager manager;
+        auto responce = manager.Process(request);
+
+        std::cout << "[SERVER] Sent responce:\n" << responce << std::endl;
+        while (!responce.empty() && mSocket.is_open()) {
+            boost::asio::write(mSocket, boost::asio::buffer(responce));
+            responce.erase(0, responce.find_first_of('\0'));
+        }
     }
 }
 

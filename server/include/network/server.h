@@ -11,8 +11,6 @@ public:
 private:
     void StartAccept();
 
-    void HandleAccept(std::shared_ptr<Connection> connection);
-
     boost::asio::io_context& mContext;
     boost::asio::ip::tcp::acceptor mAcceptor;
 };

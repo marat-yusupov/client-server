@@ -18,18 +18,11 @@ void Server::StartAccept() {
     std::cout << "[SERVER] Start listen on " << mAcceptor.local_endpoint() << std::endl;
     for (;;) {
         auto new_connection = Connection::Create(mContext);
-
         mAcceptor.accept(new_connection->Socket());
-        std::thread accept_handler{[this, new_connection]() { HandleAccept(new_connection); }};
+        std::thread accept_handler{[this, new_connection]() { new_connection->Start(); }};
         accept_handler.detach();
     }
     std::cout << "[SERVER] Stop listen on " << mAcceptor.local_endpoint() << std::endl;
-}
-
-void Server::HandleAccept(std::shared_ptr<Connection> connection) {
-    std::cout << "[SERVER] Сonnection established" << std::endl;
-    connection->Start();
-    std::cout << "[SERVER] Сlose connection" << std::endl;
 }
 
 }  // namespace network

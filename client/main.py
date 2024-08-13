@@ -47,6 +47,8 @@ def main():
         sock.close()
     except ConnectionRefusedError:
         print(f"[CLIENT] Server ({host}:{port}) not available")
+    except BrokenPipeError:
+        print(f"[CLIENT] Server closed socket")
 
 
 main()
