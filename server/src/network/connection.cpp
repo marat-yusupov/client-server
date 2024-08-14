@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 
 #include <boost/asio.hpp>
 
@@ -11,7 +12,7 @@ std::shared_ptr<Connection> Connection::Create(boost::asio::io_context& io_conte
     return std::shared_ptr<Connection>(new Connection(io_context));
 }
 
-Connection::Connection(boost::asio::io_context& io_context) : mSocket{io_context} {}
+Connection::Connection(boost::asio::io_context& io_context) : mSocket{io_context}, mManager{mSocket} {}
 
 Connection::~Connection() {
     if (mSocket.is_open())
@@ -48,14 +49,7 @@ void Connection::Start() {
         request.append(temp_buffer, len);
         std::cout << "[SERVER] Request received:\n" << request << std::endl;
 
-        request::Manager manager;
-        auto responce = manager.Process(request);
-
-        std::cout << "[SERVER] Sent responce:\n" << responce << std::endl;
-        while (!responce.empty() && mSocket.is_open()) {
-            boost::asio::write(mSocket, boost::asio::buffer(responce));
-            responce.erase(0, responce.find_first_of('\0'));
-        }
+        mManager.Process(request);
     }
 }
 

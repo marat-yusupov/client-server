@@ -1,4 +1,7 @@
 #include <iostream>
+#include <thread>
+
+#include <boost/asio.hpp>
 
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
@@ -10,27 +13,35 @@
 
 namespace request {
 
-Manager::Manager() = default;
+Manager::Manager(boost::asio::ip::tcp::socket& socket) : mSocketRef(socket) {}
 Manager::~Manager() = default;
 
-std::string Manager::Process(std::string const& request_json_as_string) {
-    auto prepared_request = Prepare(request_json_as_string);
-    if (!prepared_request) {
-        return GetErrorResult("Parse request args FAILED");
-    }
+void Manager::Process(std::string const& request_json_as_string) {
+    auto process_request = [this, request_json_as_string]() {
+        auto prepared_request = Prepare(request_json_as_string);
+        if (!prepared_request) {
+            auto error_responce = GetErrorResult("Parse request args FAILED");
+            SendResponce(error_responce);
+        }
 
-    auto request_result = prepared_request->Process();
-    if (!request_result) {
-        return GetErrorResult("Request process FAILED");
-    }
+        auto request_result = prepared_request->Process();
+        if (!request_result) {
+            auto error_responce = GetErrorResult("Request process FAILED");
+            SendResponce(error_responce);
+        }
 
-    auto request_result_json = request_result->ToJson();
+        auto request_result_json = request_result->ToJson();
 
-    rapidjson::StringBuffer sbuf;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(sbuf);
-    request_result_json.Accept(writer);
+        rapidjson::StringBuffer sbuf;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(sbuf);
+        request_result_json.Accept(writer);
 
-    return sbuf.GetString();
+        std::string responce = sbuf.GetString();
+        SendResponce(responce);
+    };
+
+    std::thread request_processor(process_request);
+    request_processor.detach();
 }
 
 std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_string) {
@@ -42,7 +53,7 @@ std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_st
         return nullptr;
     }
 
-    if (!request_json.HasMember("method") || !request_json.HasMember("key")) {
+    if (!request_json.HasMember("key") || !request_json.HasMember("method")) {
         std::cerr << "[SERVER] Invalid request format" << std::endl;
         return nullptr;
     }
@@ -66,6 +77,33 @@ std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_st
 
     std::cerr << "[SERVER] Unknown method \"" + method_name + "\"." << std::endl;
     return nullptr;
+}
+
+std::unique_ptr<IResult> Manager::ProcessInternal(std::unique_ptr<IRequest> const& request) {
+    std::unique_ptr<IResult> result = nullptr;
+
+    auto name = request->Name();
+    switch (name) {
+        case RequestName::Get:
+            break;
+
+        case RequestName::Set:
+            break;
+
+        default:
+            break;
+    }
+
+    return nullptr;
+}
+
+void Manager::SendResponce(std::string& responce) {
+    std::cout << "[SERVER] Sent responce:\n" << responce << std::endl;
+    std::lock_guard locker(mSocketMutex);
+    while (!responce.empty() && mSocketRef.is_open()) {
+        boost::asio::write(mSocketRef, boost::asio::buffer(responce));
+        responce.erase(0, responce.find_first_of('\0'));
+    }
 }
 
 std::string Manager::GetErrorResult(std::string const& error_message) {

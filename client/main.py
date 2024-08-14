@@ -38,7 +38,11 @@ def main():
             key = random.choice(keys)
 
             if i == 10:
-                request = {"key": key, "method": "$set", "value": random.randint(1, 9)}
+                request = {
+                    "key": key,
+                    "method": "$set",
+                    "value": str(random.randint(1, 9)),
+                }
                 asyncio.run(tcp_echo_client(request, sock))
                 continue
 

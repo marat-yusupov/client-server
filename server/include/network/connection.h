@@ -1,5 +1,7 @@
 #pragma once
 
+#include <request/manager.h>
+
 #include <boost/asio.hpp>
 
 namespace network {
@@ -17,6 +19,7 @@ private:
     Connection(boost::asio::io_context& io_context);
 
     boost::asio::ip::tcp::socket mSocket;
+    request::Manager mManager;
 };
 
 }  // namespace network
