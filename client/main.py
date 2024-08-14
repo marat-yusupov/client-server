@@ -4,6 +4,7 @@ import asyncio
 import socket
 import random
 import json
+import sys
 
 keys = [
     "tree",
@@ -45,10 +46,16 @@ def main():
             asyncio.run(tcp_echo_client(request, sock))
 
         sock.close()
+    except ConnectionResetError:
+        print(f"[CLIENT] Server reset connection")
     except ConnectionRefusedError:
         print(f"[CLIENT] Server ({host}:{port}) not available")
     except BrokenPipeError:
         print(f"[CLIENT] Server closed socket")
 
 
-main()
+try:
+    main()
+except KeyboardInterrupt:
+    print(f"\nInterrupt by user, goodbye!")
+    sys.exit()
