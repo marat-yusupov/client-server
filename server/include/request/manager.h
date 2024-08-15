@@ -22,16 +22,12 @@ public:
 private:
     std::unique_ptr<IRequest> Prepare(std::string const& request_json_as_string);
 
-    // TODO: work in progress
-    std::unique_ptr<IResult> ProcessInternal(std::unique_ptr<IRequest> const& request);
-
     void SendResponce(std::string& responce);
 
     std::string GetErrorResult(std::string const& error_message);
 
     std::vector<std::shared_ptr<IRequest>> mSetRequestQueue;
 
-    std::mutex mSocketMutex;
     boost::asio::ip::tcp::socket& mSocketRef;
 };
 
