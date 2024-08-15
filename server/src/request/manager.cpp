@@ -44,12 +44,12 @@ std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_st
     request_json.Parse(request_json_as_string.c_str());
 
     if (request_json.HasParseError()) {
-        std::cerr << "[SERVER] Parse request FAILED" << std::endl;
+        std::cerr << "[SERVER::WARNING] Parse request FAILED" << std::endl;
         return nullptr;
     }
 
     if (!request_json.HasMember("key") || !request_json.HasMember("method")) {
-        std::cerr << "[SERVER] Invalid request format" << std::endl;
+        std::cerr << "[SERVER::WARNING] Invalid request format" << std::endl;
         return nullptr;
     }
 
@@ -62,7 +62,7 @@ std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_st
 
     if (method_name == "$set") {
         if (!request_json.HasMember("value")) {
-            std::cerr << "[SERVER] Invalid \"$set\"-request format" << std::endl;
+            std::cerr << "[SERVER::WARNING] Invalid \"$set\"-request format" << std::endl;
             return nullptr;
         }
 
@@ -70,7 +70,7 @@ std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_st
         return std::make_unique<models::Set>(key, new_value);
     }
 
-    std::cerr << "[SERVER] Unknown method \"" + method_name + "\"." << std::endl;
+    std::cerr << "[SERVER::WARNING] Unknown method \"" + method_name + "\"." << std::endl;
     return nullptr;
 }
 

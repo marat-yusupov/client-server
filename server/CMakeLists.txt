@@ -10,6 +10,7 @@ find_package(RapidJSON)
 
 set(SOURCES "*.cpp"
             "src/*.cpp"
+            "src/data/*.cpp"
             "src/network/*.cpp"
             "src/request/*.cpp"
             "src/request/models/*.cpp")
