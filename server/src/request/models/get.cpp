@@ -3,6 +3,7 @@
 
 #include <rapidjson/document.h>
 
+#include <data/config.h>
 #include <request/models/get.h>
 
 // TODO: dell
@@ -30,17 +31,10 @@ RequestName Get::Name() {
 }
 
 std::unique_ptr<IResult> Get::Process() {
-    auto it = MockDataTable.find(mKey);
-    if (it == MockDataTable.end()) {
-        return nullptr;
-    }
+    auto& config = data::Config::Instance();
+    auto result = config.Read(mKey);
 
-    auto value = it->second;
-    if (value.empty()) {
-        return nullptr;
-    }
-
-    return std::make_unique<GetResult>(value);
+    return std::make_unique<GetResult>(result);
 }
 
 }  // namespace request::models

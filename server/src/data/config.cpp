@@ -9,6 +9,11 @@
 
 namespace data {
 
+Config& Config::Instance() {
+    static Config instance("/home/myuspv/Pets/client-server/server/config.txt");
+    return instance;
+}
+
 Config::Config(std::string const& path) : mPath(path) {
     InitializeCachedValue();
 }
@@ -16,20 +21,22 @@ Config::Config(std::string const& path) : mPath(path) {
 Config::~Config() {}
 
 std::string Config::Read(std::string const& key) {
-    if (mContent.IsNull()) {
+    std::lock_guard locker(mConfigMutex);
+    if (mCache.IsNull()) {
         std::cerr << "[SERVER::ERROR] File is empty" << std::endl;
         return std::string{};
     }
 
-    if (!mContent.HasMember(key.c_str())) {
+    if (!mCache.HasMember(key.c_str())) {
         std::cerr << "[SERVER::ERROR] Value with key \"" << key << "\" not found in config file" << std::endl;
         return std::string{};
     }
 
-    return mContent[key.c_str()].GetString();
+    return mCache[key.c_str()].GetString();
 }
 
 bool Config::Write(std::string const& key, std::string const& value) {
+    std::lock_guard locker(mConfigMutex);
     std::ofstream file{mPath};
     if (!file.is_open()) {
         std::cerr << "[SERVER::ERROR] Failed opening file by path: \"" << mPath << "\"" << std::endl;
@@ -37,18 +44,18 @@ bool Config::Write(std::string const& key, std::string const& value) {
         return false;
     }
 
-    rapidjson::Value json_value(value.c_str(), mContent.GetAllocator());
+    rapidjson::Value json_value(value.c_str(), mCache.GetAllocator());
 
-    if (!mContent.HasMember(key.c_str())) {
-        rapidjson::Value json_key(key.c_str(), mContent.GetAllocator());
-        mContent.AddMember(json_key, json_value, mContent.GetAllocator());
+    if (!mCache.HasMember(key.c_str())) {
+        rapidjson::Value json_key(key.c_str(), mCache.GetAllocator());
+        mCache.AddMember(json_key, json_value, mCache.GetAllocator());
     }
 
-    mContent[key.c_str()] = json_value;
+    mCache[key.c_str()] = json_value;
 
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    mContent.Accept(writer);
+    mCache.Accept(writer);
 
     file.clear();
     file << buffer.GetString();
@@ -58,18 +65,19 @@ bool Config::Write(std::string const& key, std::string const& value) {
 }
 
 bool Config::InitializeCachedValue() {
+    std::lock_guard locker(mConfigMutex);
     std::ifstream file{mPath};
     if (!file.is_open()) {
         std::cerr << "[SERVER::ERROR] Failed opening file by path: \"" << mPath << "\"" << std::endl;
         std::cerr << "[SERVER::ERROR] Cache not be updated" << std::endl;
-        return false;
+        throw;
     }
 
     std::stringstream buffer;
     buffer << file.rdbuf();
     file.close();
 
-    mContent.Parse(buffer.str().c_str());
+    mCache.Parse(buffer.str().c_str());
 
     return true;
 }

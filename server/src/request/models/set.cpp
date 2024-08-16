@@ -3,6 +3,7 @@
 
 #include <rapidjson/document.h>
 
+#include <data/config.h>
 #include <request/models/set.h>
 
 // TODO: dell
@@ -30,18 +31,10 @@ RequestName Set::Name() {
 }
 
 std::unique_ptr<IResult> Set::Process() {
-    try {
-        auto it = MockDataTable.find(mKey);
-        if (it == MockDataTable.end()) {
-            MockDataTable.emplace(mKey, mNewValue);
-            return std::make_unique<SetResult>();
-        }
+    auto& config = data::Config::Instance();
+    auto result = config.Write(mKey, mNewValue);
 
-        MockDataTable[mKey] = mNewValue;
-        return std::make_unique<SetResult>();
-    } catch (...) {
-        return std::make_unique<SetResult>(false);
-    }
+    return std::make_unique<SetResult>(result);
 }
 
 }  // namespace request::models

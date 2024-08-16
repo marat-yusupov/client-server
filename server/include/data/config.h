@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <string>
 
 #include <rapidjson/document.h>
@@ -8,17 +9,20 @@ namespace data {
 
 class Config {
 public:
-    Config(std::string const& path);
+    static Config& Instance();
     ~Config();
 
     std::string Read(std::string const& key);
     bool Write(std::string const& key, std::string const& value);
 
 private:
+    Config(std::string const& path);
+
     bool InitializeCachedValue();
 
     std::string mPath;
-    rapidjson::Document mContent;
+    std::mutex mConfigMutex;
+    rapidjson::Document mCache;
 };
 
 }  // namespace data
