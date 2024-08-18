@@ -18,7 +18,7 @@ public:
 private:
     Config(std::string const& path);
 
-    void ValidateCache();
+    void InitCache();
 
     std::string mPath;
     std::mutex mConfigMutex;

@@ -6,9 +6,6 @@
 #include <data/config.h>
 #include <request/models/get.h>
 
-// TODO: dell
-#include <request/mock_data_table.h>
-
 namespace request::models {
 
 GetResult::GetResult(std::string const& value) : mValue{value} {}

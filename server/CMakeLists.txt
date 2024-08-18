@@ -13,6 +13,7 @@ add_definitions(-DCONFIG_PATH="${CMAKE_SOURCE_DIR}/config.txt")
 set(SOURCES "*.cpp"
             "src/*.cpp"
             "src/data/*.cpp"
+            "src/generic/*.cpp"
             "src/network/*.cpp"
             "src/request/*.cpp"
             "src/request/models/*.cpp")

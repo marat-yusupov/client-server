@@ -6,9 +6,6 @@
 #include <data/config.h>
 #include <request/models/set.h>
 
-// TODO: dell
-#include <request/mock_data_table.h>
-
 namespace request::models {
 
 SetResult::SetResult(bool is_success) : mIsSuccess{is_success} {}

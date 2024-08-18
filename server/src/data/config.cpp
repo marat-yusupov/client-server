@@ -15,7 +15,7 @@ Config& Config::Instance() {
 }
 
 Config::Config(std::string const& path) : mPath(path) {
-    ValidateCache();
+    InitCache();
 }
 
 Config::~Config() {}
@@ -44,7 +44,12 @@ bool Config::Write(std::string const& key, std::string const& value) {
         return false;
     }
 
-    ValidateCache();
+    {
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        mCache.Parse(buffer.str().c_str());
+    }
+
     rapidjson::Value json_value(value.c_str(), mCache.GetAllocator());
 
     if (!mCache.HasMember(key.c_str())) {
@@ -65,7 +70,7 @@ bool Config::Write(std::string const& key, std::string const& value) {
     return true;
 }
 
-void Config::ValidateCache() {
+void Config::InitCache() {
     std::lock_guard locker(mConfigMutex);
     std::ifstream file{mPath};
     if (!file.is_open()) {
@@ -78,7 +83,6 @@ void Config::ValidateCache() {
     buffer << file.rdbuf();
     file.close();
 
-    mCache.SetObject();
     mCache.Parse(buffer.str().c_str());
 }
 
