@@ -10,7 +10,7 @@
 namespace data {
 
 Config& Config::Instance() {
-    static Config instance("/home/myuspv/Pets/client-server/server/config.txt");
+    static Config instance(CONFIG_PATH);
     return instance;
 }
 

@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(RapidJSON)
 
+add_definitions(-DCONFIG_PATH="${CMAKE_SOURCE_DIR}/config.txt")
+
 set(SOURCES "*.cpp"
             "src/*.cpp"
             "src/data/*.cpp"
