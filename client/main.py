@@ -34,10 +34,10 @@ def main():
         port = 8080
         sock.connect((host, port))
 
-        for i in range(11):
+        for i in range(10001):
             key = random.choice(keys)
 
-            if i == 10:
+            if i % 100 == 0:
                 request = {
                     "key": key,
                     "method": "$set",

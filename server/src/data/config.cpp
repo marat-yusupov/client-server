@@ -15,7 +15,7 @@ Config& Config::Instance() {
 }
 
 Config::Config(std::string const& path) : mPath(path) {
-    InitializeCachedValue();
+    ValidateCache();
 }
 
 Config::~Config() {}
@@ -44,6 +44,7 @@ bool Config::Write(std::string const& key, std::string const& value) {
         return false;
     }
 
+    ValidateCache();
     rapidjson::Value json_value(value.c_str(), mCache.GetAllocator());
 
     if (!mCache.HasMember(key.c_str())) {
@@ -64,7 +65,7 @@ bool Config::Write(std::string const& key, std::string const& value) {
     return true;
 }
 
-bool Config::InitializeCachedValue() {
+void Config::ValidateCache() {
     std::lock_guard locker(mConfigMutex);
     std::ifstream file{mPath};
     if (!file.is_open()) {
@@ -77,9 +78,8 @@ bool Config::InitializeCachedValue() {
     buffer << file.rdbuf();
     file.close();
 
+    mCache.SetObject();
     mCache.Parse(buffer.str().c_str());
-
-    return true;
 }
 
 }  // namespace data
