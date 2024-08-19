@@ -12,6 +12,7 @@
 #include <request/manager.h>
 #include <request/models/get.h>
 #include <request/models/set.h>
+#include <request/statistic.h>
 
 namespace request {
 
@@ -23,13 +24,17 @@ void Manager::Process(std::string const& request_json_as_string) {
     if (!prepared_request) {
         auto error_responce = GetErrorResult("Parse request args FAILED");
         SendResponce(error_responce);
+        return;
     }
 
     auto request_result = prepared_request->Process();
     if (!request_result) {
         auto error_responce = GetErrorResult("Request process FAILED");
         SendResponce(error_responce);
+        return;
     }
+
+    Statistic::Instance().Apply(prepared_request->Name());
 
     auto request_result_json = request_result->ToJson();
 
