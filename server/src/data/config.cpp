@@ -6,6 +6,7 @@
 #include <rapidjson/writer.h>
 
 #include <data/config.h>
+#include <generic/log_utils.h>
 
 namespace data {
 
@@ -23,12 +24,12 @@ Config::~Config() {}
 std::string Config::Read(std::string const& key) {
     std::lock_guard locker(mConfigMutex);
     if (mCache.IsNull()) {
-        std::cerr << "[SERVER::ERROR] File is empty" << std::endl;
+        generic::LogErr(__func__, "File is empty");
         return std::string{};
     }
 
     if (!mCache.HasMember(key.c_str())) {
-        std::cerr << "[SERVER::ERROR] Value with key \"" << key << "\" not found in config file" << std::endl;
+        generic::LogErr(__func__, "Value with key \"" + key + "\" not found in config file");
         return std::string{};
     }
 
@@ -39,8 +40,8 @@ bool Config::Write(std::string const& key, std::string const& value) {
     std::lock_guard locker(mConfigMutex);
     std::ofstream file{mPath};
     if (!file.is_open()) {
-        std::cerr << "[SERVER::ERROR] Failed opening file by path: \"" << mPath << "\"" << std::endl;
-        std::cerr << "[SERVER::ERROR] Data not be writted" << std::endl;
+        generic::LogErr(__func__, "Failed opening file by path: \"" + mPath + "\"");
+        generic::LogErr(__func__, "Data not be writted");
         return false;
     }
 
@@ -74,8 +75,8 @@ void Config::InitCache() {
     std::lock_guard locker(mConfigMutex);
     std::ifstream file{mPath};
     if (!file.is_open()) {
-        std::cerr << "[SERVER::ERROR] Failed opening file by path: \"" << mPath << "\"" << std::endl;
-        std::cerr << "[SERVER::ERROR] Cache not be updated" << std::endl;
+        generic::LogErr(__func__, "Failed opening file by path: \"" + mPath + "\"");
+        generic::LogErr(__func__, "Cache not be updated");
         throw;
     }
 

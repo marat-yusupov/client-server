@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 
+#include <generic/log_utils.h>
 #include <generic/thread_pool.h>
 
 #include <network/connection.h>
@@ -16,14 +17,15 @@ Server::Server(boost::asio::io_context& io_context)
 }
 
 void Server::StartAccept() {
-    std::cout << "[SERVER] Start listen on " << mAcceptor.local_endpoint() << std::endl;
+    generic::Log(__func__, "Start listen on " + mAcceptor.local_endpoint().address().to_string());
     generic::ThreadPool thread_pool;
     for (;;) {
         auto new_connection = Connection::Create(mContext);
         mAcceptor.accept(new_connection->Socket());
         thread_pool.Enqueue([new_connection] { new_connection->Start(); });
     }
-    std::cout << "[SERVER] Stop listen on " << mAcceptor.local_endpoint() << std::endl;
+
+    generic::Log(__func__, "Stop listen on" + mAcceptor.local_endpoint().address().to_string());
 }
 
 }  // namespace network

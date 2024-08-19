@@ -2,6 +2,8 @@
 
 #include <boost/asio.hpp>
 
+#include <generic/log_utils.h>
+
 #include <network/server.h>
 
 int main() {
@@ -10,7 +12,7 @@ int main() {
         network::Server server{io_context};
         io_context.run();
     } catch (std::exception& exception) {
-        std::cerr << "[SERVER::ERROR] " << exception.what() << std::endl;
+        generic::LogErr(__func__, exception.what());
     }
     return 0;
 }

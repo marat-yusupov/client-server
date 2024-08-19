@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 
+#include <generic/log_utils.h>
 #include <network/connection.h>
 #include <request/manager.h>
 
@@ -26,7 +27,7 @@ boost::asio::ip::tcp::socket& Connection::Socket() {
 // TODO: Подумать, как реализовать таймер, чтобы отключаться от клиента, если запросов нет более N-секунд
 // TODO: Подумать, как разбить метод на разные методы
 void Connection::Start() {
-    std::cout << "[SERVER] Сonnection established" << std::endl;
+    generic::Log(__func__, "Сonnection established");
 
     // TODO: Переделать на while(mSocket.is_open()) когда будет реализован таймер
     for (;;) {
@@ -36,18 +37,18 @@ void Connection::Start() {
         auto len = mSocket.read_some(boost::asio::buffer(temp_buffer), error_code);
         if (error_code) {
             if (error_code != boost::asio::error::eof) {
-                std::cout << "[SERVER::WARNING] Failed read request (ERROR_CODE: " << error_code << ")" << std::endl;
+                generic::LogWarn(__func__, "Failed read request (ERROR: " + error_code.message() + ")");
                 continue;
             }
 
-            std::cout << "[SERVER] Connection reset by peer" << std::endl;
+            generic::Log(__func__, "Сonnection reset by peer");
             mSocket.close();
             return;
         }
 
         std::string request{};
         request.append(temp_buffer, len);
-        std::cout << "[SERVER] Request received:\n" << request << std::endl;
+        generic::Log(__func__, "Request received:\n" + request);
 
         mManager.Process(request);
     }

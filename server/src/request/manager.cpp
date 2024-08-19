@@ -7,6 +7,8 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+#include <generic/log_utils.h>
+
 #include <request/manager.h>
 #include <request/models/get.h>
 #include <request/models/set.h>
@@ -44,12 +46,12 @@ std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_st
     request_json.Parse(request_json_as_string.c_str());
 
     if (request_json.HasParseError()) {
-        std::cerr << "[SERVER::WARNING] Parse request FAILED" << std::endl;
+        generic::LogWarn(__func__, "Parse request FAILED");
         return nullptr;
     }
 
     if (!request_json.HasMember("key") || !request_json.HasMember("method")) {
-        std::cerr << "[SERVER::WARNING] Invalid request format" << std::endl;
+        generic::LogWarn(__func__, "Invalid request format");
         return nullptr;
     }
 
@@ -62,7 +64,7 @@ std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_st
 
     if (method_name == "$set") {
         if (!request_json.HasMember("value")) {
-            std::cerr << "[SERVER::WARNING] Invalid \"$set\"-request format" << std::endl;
+            generic::LogWarn(__func__, "Invalid \"$set\"-request format");
             return nullptr;
         }
 
@@ -70,12 +72,12 @@ std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_st
         return std::make_unique<models::Set>(key, new_value);
     }
 
-    std::cerr << "[SERVER::WARNING] Unknown method \"" + method_name + "\"." << std::endl;
+    generic::LogWarn(__func__, "Unknown method \"" + method_name + "\".");
     return nullptr;
 }
 
 void Manager::SendResponce(std::string& responce) {
-    std::cout << "[SERVER] Sent responce:\n" << responce << std::endl;
+    generic::Log(__func__, responce);
     while (!responce.empty() && mSocketRef.is_open()) {
         boost::asio::write(mSocketRef, boost::asio::buffer(responce));
         responce.erase(0, responce.find_first_of('\0'));
