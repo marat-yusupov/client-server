@@ -48,7 +48,6 @@ void Connection::Start() {
 
         std::string request{};
         request.append(temp_buffer, len);
-        generic::Log(__func__, "Request received:\n" + request);
 
         mManager.Process(request);
     }

@@ -35,7 +35,6 @@ void Manager::Process(std::string const& request_json_as_string) {
     }
 
     Statistic::Instance().Apply(prepared_request->Name());
-
     auto request_result_json = request_result->ToJson();
 
     rapidjson::StringBuffer sbuf;
@@ -82,7 +81,6 @@ std::unique_ptr<IRequest> Manager::Prepare(std::string const& request_json_as_st
 }
 
 void Manager::SendResponce(std::string& responce) {
-    generic::Log(__func__, responce);
     while (!responce.empty() && mSocketRef.is_open()) {
         boost::asio::write(mSocketRef, boost::asio::buffer(responce));
         responce.erase(0, responce.find_first_of('\0'));

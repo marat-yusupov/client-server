@@ -18,8 +18,7 @@ Statistic::Statistic() {
     auto start_time = std::chrono::high_resolution_clock::now();
     mStatisticPrinter = std::thread([&]() {
         for (;;) {
-            std::this_thread::sleep_for(std::chrono::seconds(2));
-
+            std::this_thread::sleep_for(std::chrono::seconds(5));
             Print();
             mReadLastFiveSeconds = 0;
             mWriteLastFiveSeconds = 0;
@@ -50,15 +49,17 @@ void Statistic::Apply(RequestName request_name) {
 
 void Statistic::Print() {
     // clang-format off
-    std::string printable_data = std::format(R"(
+    std::string printable_data = std::format(R"( Statistic message:
 
-[READ REQUEST INVOKE STATISTICS]:
-    Last 5 seconds: {}
-    All: {}
-
-[WRITE REQUEST INVOKE STATISTICS]:
-    Last 5 seconds: {}
-    All: {}
+    -------------------------------------
+     $get-REQUEST INVOKE STATISTICS:
+         Last 5 seconds: {}
+         All: {}
+    =====================================
+     $set-REQUEST INVOKE STATISTICS:
+         Last 5 seconds: {}
+         All: {} 
+    -------------------------------------
     
 )", 
     
