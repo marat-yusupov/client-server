@@ -5,39 +5,42 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-#include <data/config.h>
+#include <data/config_handler.h>
 #include <generic/log_utils.h>
 
 namespace data {
 
-Config& Config::Instance() {
-    static Config instance(CONFIG_PATH);
+ConfigHandler& ConfigHandler::Instance() {
+    static ConfigHandler instance(CONFIG_PATH);
     return instance;
 }
 
-Config::Config(std::string const& path) : mPath(path) {
+ConfigHandler::ConfigHandler(std::string const& path) : mPath(path) {
     InitCache();
 }
 
-Config::~Config() {}
+ConfigHandler::~ConfigHandler() {}
 
-std::string Config::Read(std::string const& key) {
+std::string ConfigHandler::Read(std::string const& key) {
     std::lock_guard locker(mConfigMutex);
     if (mCache.IsNull()) {
         generic::LogErr(__func__, "File is empty");
         return std::string{};
     }
 
-    // TODO: Падает при попытке прочитать файл, которого нет
     if (!mCache.HasMember(key.c_str())) {
         generic::LogErr(__func__, "Value with key \"" + key + "\" not found in config file");
+        return std::string{};
+    }
+
+    if (!mCache[key.c_str()].IsString()) {
         return std::string{};
     }
 
     return mCache[key.c_str()].GetString();
 }
 
-bool Config::Write(std::string const& key, std::string const& value) {
+bool ConfigHandler::Write(std::string const& key, std::string const& value) {
     std::lock_guard locker(mConfigMutex);
     std::ofstream file{mPath};
     if (!file.is_open()) {
@@ -72,7 +75,7 @@ bool Config::Write(std::string const& key, std::string const& value) {
     return true;
 }
 
-void Config::InitCache() {
+void ConfigHandler::InitCache() {
     std::lock_guard locker(mConfigMutex);
     std::ifstream file{mPath};
     if (!file.is_open()) {
@@ -84,6 +87,11 @@ void Config::InitCache() {
     std::stringstream buffer;
     buffer << file.rdbuf();
     file.close();
+
+    if (buffer.str().empty()) {
+        mCache.SetObject();
+        return;
+    }
 
     mCache.Parse(buffer.str().c_str());
 }

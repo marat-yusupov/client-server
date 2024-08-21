@@ -3,7 +3,7 @@
 
 #include <rapidjson/document.h>
 
-#include <data/config.h>
+#include <data/config_handler.h>
 #include <request/models/get.h>
 
 namespace request::models {
@@ -28,8 +28,8 @@ RequestName Get::Name() {
 }
 
 std::unique_ptr<IResult> Get::Process() {
-    auto& config = data::Config::Instance();
-    auto result = config.Read(mKey);
+    auto& config_handler = data::ConfigHandler::Instance();
+    auto result = config_handler.Read(mKey);
 
     return std::make_unique<GetResult>(result);
 }

@@ -33,5 +33,7 @@
 
 .vscode/
 build/
-server/config.txt
 logs/
+
+server/config.txt
+client/__pycache__

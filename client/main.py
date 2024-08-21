@@ -20,7 +20,6 @@ KEYS = [
 
 async def main():
     SERVER_ADDRESS = ("localhost", 8080)
-    REQUEST_COUNT = 10000
 
     client = ClientOf(SERVER_ADDRESS)
     while True:
@@ -30,7 +29,7 @@ async def main():
             # Из ТЗ:
             # "Выбирает случайный ключ из захардкоженого списка и выполняет на сервере $get с вероятностью 99%,
             # а в 1% случаев записывает случайные данные в этот ключ, выполняя $set."
-            for i in range(REQUEST_COUNT):
+            for i in range(10000):
                 key = random.choice(KEYS)
 
                 if i % 100 == 0:

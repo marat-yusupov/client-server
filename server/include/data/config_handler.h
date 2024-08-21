@@ -7,16 +7,16 @@
 
 namespace data {
 
-class Config {
+class ConfigHandler {
 public:
-    static Config& Instance();
-    ~Config();
+    static ConfigHandler& Instance();
+    ~ConfigHandler();
 
     std::string Read(std::string const& key);
     bool Write(std::string const& key, std::string const& value);
 
 private:
-    Config(std::string const& path);
+    ConfigHandler(std::string const& path);
 
     void InitCache();
 

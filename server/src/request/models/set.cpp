@@ -3,7 +3,7 @@
 
 #include <rapidjson/document.h>
 
-#include <data/config.h>
+#include <data/config_handler.h>
 #include <request/models/set.h>
 
 namespace request::models {
@@ -28,8 +28,8 @@ RequestName Set::Name() {
 }
 
 std::unique_ptr<IResult> Set::Process() {
-    auto& config = data::Config::Instance();
-    auto result = config.Write(mKey, mNewValue);
+    auto& config_handler = data::ConfigHandler::Instance();
+    auto result = config_handler.Write(mKey, mNewValue);
 
     return std::make_unique<SetResult>(result);
 }
