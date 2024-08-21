@@ -28,6 +28,7 @@ std::string Config::Read(std::string const& key) {
         return std::string{};
     }
 
+    // TODO: Падает при попытке прочитать файл, которого нет
     if (!mCache.HasMember(key.c_str())) {
         generic::LogErr(__func__, "Value with key \"" + key + "\" not found in config file");
         return std::string{};

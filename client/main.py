@@ -1,12 +1,10 @@
-# TODO: RAW CLIENT! NOT FOR DEMONSTRATION! ONLY FOR TESTING!
-
 import asyncio
-import socket
 import random
-import json
 import sys
 
-keys = [
+from client_of import ClientOf
+
+KEYS = [
     "tree",
     "cube",
     "pen",
@@ -20,46 +18,48 @@ keys = [
 ]
 
 
-async def tcp_echo_client(request, sock):
-    print(f"[CLIENT] Sent request: {request}")
-    sock.sendall(json.dumps(request).encode())
-    responce = sock.recv(1024)
-    print(f"[CLIENT] Received responce: {responce.decode()}")
+async def main():
+    SERVER_ADDRESS = ("localhost", 8080)
+    REQUEST_COUNT = 10000
 
+    client = ClientOf(SERVER_ADDRESS)
+    while True:
+        try:
+            await client.connect_to_server()
 
-def main():
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        host = "localhost"
-        port = 8080
-        sock.connect((host, port))
+            # Из ТЗ:
+            # "Выбирает случайный ключ из захардкоженого списка и выполняет на сервере $get с вероятностью 99%,
+            # а в 1% случаев записывает случайные данные в этот ключ, выполняя $set."
+            for i in range(REQUEST_COUNT):
+                key = random.choice(KEYS)
 
-        for i in range(10001):
-            key = random.choice(keys)
+                if i % 100 == 0:
+                    request = {
+                        "key": key,
+                        "method": "$set",
+                        "value": str(random.randint(1, 9)),
+                    }
 
-            if i % 100 == 0:
-                request = {
-                    "key": key,
-                    "method": "$set",
-                    "value": str(random.randint(1, 9)),
-                }
-                asyncio.run(tcp_echo_client(request, sock))
-                continue
+                    await client.execute_request(request)
+                    continue
 
-            request = {"key": key, "method": "$get"}
-            asyncio.run(tcp_echo_client(request, sock))
+                request = {"key": key, "method": "$get"}
+                await client.execute_request(request)
 
-        sock.close()
-    except ConnectionResetError:
-        print(f"[CLIENT] Server reset connection")
-    except ConnectionRefusedError:
-        print(f"[CLIENT] Server ({host}:{port}) not available")
-    except BrokenPipeError:
-        print(f"[CLIENT] Server closed socket")
+            break
+        except ConnectionRefusedError:
+            print(f"[CLIENT] Server {SERVER_ADDRESS} not available. Retrying...\r")
+            await asyncio.sleep(1)
+        except ConnectionResetError:
+            print(f"[CLIENT] Connection reset by server. Retrying... \r")
+            client.disconnect_from_server()
+        except BrokenPipeError:
+            print(f"[CLIENT] Server closed socket. Retrying... \r")
+            client.disconnect_from_server()
 
 
 try:
-    main()
+    asyncio.run(main())
 except KeyboardInterrupt:
     print(f"\nInterrupt by user, goodbye!")
     sys.exit()
